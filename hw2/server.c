@@ -25,6 +25,13 @@ void write_client_int(int cli_sockfd, int msg)
 }
 
 
+void write_client_msg(int cli_sockfd, char * msg)
+{
+    int n = write(cli_sockfd, msg, strlen(msg));
+    if (n < 0)
+        error("ERROR writing msg to client socket");
+}
+
 void write_clients_msg(int * cli_sockfd, char * msg)
 {
     write_client_msg(cli_sockfd[0], msg);
@@ -47,7 +54,7 @@ int setup_listener(int portno)
         error("ERROR opening listener socket.");
     
     memset(&serv_addr, 0, sizeof(serv_addr));
-     serv_addr.sin_family = AF_INET;	
+    serv_addr.sin_family = AF_INET;	
     serv_addr.sin_addr.s_addr = INADDR_ANY;	
     serv_addr.sin_port = htons(portno);		
 
@@ -60,6 +67,7 @@ int setup_listener(int portno)
 
     return sockfd;
 }
+
 int recv_int(int cli_sockfd)
 {
     int msg = 0;
@@ -70,13 +78,6 @@ int recv_int(int cli_sockfd)
     printf("[DEBUG] Received int: %d\n", msg);
     
     return msg;
-}
-
-void write_client_msg(int cli_sockfd, char * msg)
-{
-    int n = write(cli_sockfd, msg, strlen(msg));
-    if (n < 0)
-        error("ERROR writing msg to client socket");
 }
 
 void get_clients(int lis_sockfd, int * cli_sockfd)
@@ -276,7 +277,8 @@ void *run_game(void *thread_data)
 
         int valid = 0;
         int move = 0;
-        while(!valid) {             move = get_player_move(cli_sockfd[player_turn]);
+        while(!valid) {            
+            move = get_player_move(cli_sockfd[player_turn]);
             if (move == -1) break; 
             printf("Player %d played position %d\n", player_turn, move);
                 
@@ -296,13 +298,13 @@ void *run_game(void *thread_data)
             send_player_count(cli_sockfd[player_turn]);
         }
         else {
-                     update_board(board, move, player_turn);
+            update_board(board, move, player_turn);
             send_update( cli_sockfd, move, player_turn );
                 
          
             draw_board(board);
 
-                        game_over = check_board(board, move);
+            game_over = check_board(board, move);
             
             if (game_over == 1) {
                 write_client_msg(cli_sockfd[player_turn], "WIN");
@@ -322,7 +324,7 @@ void *run_game(void *thread_data)
 
     printf("Game over.\n");
 
-	close(cli_sockfd[0]);
+    close(cli_sockfd[0]);
     close(cli_sockfd[1]);
 
     pthread_mutex_lock(&mutexcount);
@@ -372,5 +374,5 @@ int main(int argc, char *argv[])
     close(lis_sockfd);
 
     pthread_mutex_destroy(&mutexcount);
-pthread_exit(NULL);
+    pthread_exit(NULL);
 }
