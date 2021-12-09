@@ -361,14 +361,16 @@ int main(int argc, char *argv[])
             printf("[DEBUG] Starting new game thread...\n");
             #endif
 
-            pthread_t thread;int result = pthread_create(&thread, NULL, run_game, (void *)cli_sockfd);
+            pthread_t thread;
+            int result = pthread_create(&thread, NULL, run_game, (void *)cli_sockfd);
+            
             if (result){
                 printf("Thread creation failed with return code %d\n", result);
                 exit(-1);
             }
             
             printf("[DEBUG] New game thread started.\n");
-            }
+        }
     }
 
     close(lis_sockfd);
