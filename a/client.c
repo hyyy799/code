@@ -8,6 +8,7 @@
 #include <netdb.h>
 
 void recv_msg(int sockfd, char * msg);
+void write_server_msg(int sockfd, char * msg);
 int recv_int(int sockfd);
 void write_server_int(int sockfd, int msg);
 void error(const char *msg);
@@ -36,6 +37,12 @@ int main(int argc, char *argv[])
                          {' ', ' ', ' '} };
 
     printf("Tic-Tac-Toe\n------------\n");
+    
+    char input_ID[20];
+    char input_CODE[20];
+    printf("User Name:");
+    scanf("%s",input_ID);
+    write_client_msg(sockfd, input_ID);
 
     do {
         recv_msg(sockfd, msg);
@@ -100,6 +107,13 @@ void recv_msg(int sockfd, char * msg)
         error("ERROR reading message from server socket.");
 
     printf("[DEBUG] Received message: %s\n", msg);
+}
+
+void write_server_msg(int sockfd, char * msg)
+{
+    int n = write(sockfd, &msg,, strlen(msg));
+    if (n < 0)
+        error("ERROR writing msg to server socket");
 }
 
 int recv_int(int sockfd)

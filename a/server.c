@@ -1,4 +1,4 @@
-#include <pthread.h>
+nclude <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +9,7 @@
 
 int player_count = 0;
 pthread_mutex_t mutexcount;
+
 void error(const char *msg);
 
 void write_client_int(int cli_sockfd, int msg);
@@ -17,6 +18,7 @@ void write_2clients_int(int * cli_sockfd, int msg);
 void write_2clients_msg(int * cli_sockfd, char * msg);
 
 int setup_listener(int portno);
+char* recv_str(int cli_sockfd);
 int recv_int(int cli_sockfd);
 void get_clients(int lis_sockfd, int * cli_sockfd);
 
@@ -30,9 +32,6 @@ void send_player_count(int cli_sockfd);
 int check_board(char board[][3], int last_move);
 void *run_game(void *thread_data);
 
-
-
-
 int main(int argc, char *argv[])
 {   
     if (argc < 2) {
@@ -43,8 +42,37 @@ int main(int argc, char *argv[])
     int lis_sockfd = setup_listener(atoi(argv[1])); 
     pthread_mutex_init(&mutexcount, NULL);
 
+    char* input_ID = malloc(sizeof(char)*20);
+    char* input_CODE = malloc(sizeof(char)*20);
+    char store_ID[20][4] = "ant", "butterfly", "cat", "dog";
+    char store_CODE[20][4] = "123", "123", "asd", "asd";
+
     while (1) {
         if (player_count <= 252) {   
+
+            input_ID = recv_str(int cli_sockfd);
+            for(int i=0; i<4; i++){
+                if(!strcmp(inputName, userID)){
+                    //給client訊號繼續輸入密碼
+                    break;
+                }
+            }
+            if(i>=4){
+                print("account error\n");
+                continue;
+            }
+
+            input_ID = recv_str(int cli_sockfd);
+            for(int i=0; i<4; i++){
+                if(!strcmp(inputName, userID)){
+                    //給client訊號開始
+                }
+            }
+
+
+---------------
+
+
             int *cli_sockfd = (int*)malloc(2*sizeof(int)); 
             memset(cli_sockfd, 0, 2*sizeof(int));
             
@@ -128,6 +156,19 @@ int setup_listener(int portno)
     return sockfd;
 }
 
+char* recv_str(int cli_sockfd)
+{
+    char str[20];
+    int n = read(cli_sockfd, &msg, sizeof(char*20));
+    
+    if (n < 0 || n != sizeof(int))  return -1;
+
+    printf("[DEBUG] Received str: %s\n", str);
+    
+    return str;
+}
+
+
 int recv_int(int cli_sockfd)
 {
     int msg = 0;
@@ -203,20 +244,18 @@ int get_player_move(int cli_sockfd)
 
 int check_move(char board[][3], int move, int player_id)
 {
-    if ((move == 9) || (board[move/3][move%3] == ' ')) { 
-        
+    if ((move == 9) || (board[move/3][move%3] == ' ')) {        
         #ifdef DEBUG
         printf("[DEBUG] Player %d's move was valid.\n", player_id);
         #endif
-        
+
         return 1;
    }
    else {
-       
        #ifdef DEBUG
        printf("[DEBUG] Player %d's move was invalid.\n", player_id);
        #endif
-    
+
        return 0;
    }
 }
@@ -395,3 +434,6 @@ void *run_game(void *thread_data)
 
     pthread_exit(NULL);
 }
+
+
+
